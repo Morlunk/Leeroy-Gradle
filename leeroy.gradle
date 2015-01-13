@@ -32,11 +32,20 @@ def setupLeeroy(String leeroyDir, String artifactRegex, String dimension = "leer
             if (getFlavorDimensionList()) {
                 if (getFlavorDimensionList().contains(dimension))
                     throw new GradleException("Leeroy: required flavor dimension '${dimension}' already in use.");
-                def list = new ArrayList<String>(getFlavorDimensionList());
-                list << dimension;
+                def list = new ArrayList<String>(getFlavorDimensionList())
+                list << dimension
                 setFlavorDimensionList list
             } else {
-                flavorDimensions dimension
+                // Note that the Android plugin requires us to assign a
+                // dimension to each build flavor if flavorDimensions is set.
+                // FIXME: very hackish, will break eventually.
+                //        using a new dimension for leeroy is pretty bad in
+                //        general.
+                flavorDimensions "default", dimension
+                productFlavors.all {
+                    if (!flavorDimension)
+                        flavorDimension "default"
+                }
             }
             
             // Add new leeroy flavor within the new flavor dimension.
